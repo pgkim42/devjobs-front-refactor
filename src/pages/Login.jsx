@@ -10,18 +10,33 @@ const Container = styled.div`
   background: white;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  
+  @media (max-width: 768px) {
+    margin: 40px 20px;
+    padding: 30px 20px;
+    max-width: none;
+  }
 `;
 
 const Title = styled.h1`
   text-align: center;
   color: #333;
   margin-bottom: 30px;
+  
+  @media (max-width: 768px) {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 20px;
+  
+  @media (max-width: 768px) {
+    gap: 16px;
+  }
 `;
 
 const Input = styled.input`
@@ -34,6 +49,13 @@ const Input = styled.input`
     outline: none;
     border-color: #0066ff;
   }
+  
+  @media (max-width: 768px) {
+    padding: 14px 12px;
+    font-size: 16px;
+    /* iOS 줌 방지 */
+    -webkit-text-size-adjust: 100%;
+  }
 `;
 
 const Button = styled.button`
@@ -44,6 +66,7 @@ const Button = styled.button`
   border-radius: 6px;
   font-size: 16px;
   font-weight: 500;
+  cursor: pointer;
   
   &:hover {
     background: #0052cc;
@@ -52,6 +75,11 @@ const Button = styled.button`
   &:disabled {
     background: #ccc;
     cursor: not-allowed;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 14px;
+    font-size: 16px;
   }
 `;
 

@@ -34,6 +34,10 @@ const Hero = styled.section`
   padding: 100px 20px 80px;
   text-align: center;
   animation: ${fadeIn} 1s ease-out;
+  
+  @media (max-width: 768px) {
+    padding: 60px 20px 40px;
+  }
 `;
 
 const Badge = styled.div`
@@ -60,6 +64,10 @@ const Title = styled.h1`
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+  
+  @media (max-width: 768px) {
+    font-size: 36px;
+  }
 `;
 
 const Subtitle = styled.p`
@@ -67,6 +75,10 @@ const Subtitle = styled.p`
   color: #636e72;
   margin-bottom: 40px;
   line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    font-size: 18px;
+  }
 `;
 
 const ButtonGroup = styled.div`
@@ -74,6 +86,12 @@ const ButtonGroup = styled.div`
   gap: 20px;
   justify-content: center;
   margin-bottom: 60px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
 `;
 
 const Button = styled.button`
@@ -107,6 +125,12 @@ const Button = styled.button`
       transform: translateY(-2px);
     }
   }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 14px 28px;
+    font-size: 16px;
+  }
 `;
 
 const Stats = styled.div`
@@ -114,6 +138,11 @@ const Stats = styled.div`
   justify-content: center;
   gap: 60px;
   margin-top: 40px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 30px;
+  }
 `;
 
 const StatItem = styled.div`
@@ -136,6 +165,10 @@ const Features = styled.section`
   max-width: 1200px;
   margin: 0 auto;
   padding: 80px 20px;
+  
+  @media (max-width: 768px) {
+    padding: 60px 20px;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -144,12 +177,22 @@ const SectionTitle = styled.h2`
   text-align: center;
   color: #2d3436;
   margin-bottom: 60px;
+  
+  @media (max-width: 768px) {
+    font-size: 28px;
+    margin-bottom: 40px;
+  }
 `;
 
 const FeatureGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 30px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 `;
 
 const FeatureCard = styled.div`
@@ -185,6 +228,10 @@ const FeatureCard = styled.div`
 const RecentJobs = styled.section`
   background: white;
   padding: 80px 0;
+  
+  @media (max-width: 768px) {
+    padding: 60px 0;
+  }
 `;
 
 const JobsContainer = styled.div`
@@ -198,6 +245,11 @@ const JobGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 24px;
   margin-bottom: 40px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 `;
 
 const JobCard = styled(Link)`
@@ -255,12 +307,21 @@ const Categories = styled.section`
   max-width: 1200px;
   margin: 0 auto;
   padding: 80px 20px;
+  
+  @media (max-width: 768px) {
+    padding: 60px 20px;
+  }
 `;
 
 const CategoryGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
 `;
 
 const CategoryCard = styled(Link)`

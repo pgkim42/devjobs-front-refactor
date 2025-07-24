@@ -20,6 +20,8 @@ import MyPage from './pages/MyPage';
 import ProfileIndividual from './pages/ProfileIndividual';
 import ProfileCompany from './pages/ProfileCompany';
 import ResumeUpload from './pages/ResumeUpload';
+import BookmarkedJobs from './pages/BookmarkedJobs';
+import Messages from './pages/Messages';
 
 // 전역 스타일
 const GlobalStyle = createGlobalStyle`
@@ -70,6 +72,8 @@ function App() {
           <Route path="profile/individual" element={<ProfileIndividual />} />
           <Route path="profile/company" element={<ProfileCompany />} />
           <Route path="resume/upload" element={<ResumeUpload />} />
+          <Route path="bookmarks" element={<BookmarkedJobs />} />
+          <Route path="messages" element={<Messages />} />
         </Route>
       </Routes>
     </BrowserRouter>

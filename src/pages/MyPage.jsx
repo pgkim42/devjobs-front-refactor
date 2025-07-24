@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getUser } from '../utils/auth';
-import { jobAPI, applicationAPI } from '../api';
+import { jobAPI, applicationAPI, bookmarkAPI } from '../api';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -258,6 +258,7 @@ const MyPage = () => {
   const [companyJobs, setCompanyJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [bookmarkCount, setBookmarkCount] = useState(0);
 
   useEffect(() => {
     const currentUser = getUser();
@@ -275,6 +276,9 @@ const MyPage = () => {
         // 개인 회원: 지원 목록 가져오기
         const data = await applicationAPI.getMyApplications();
         setApplications(data);
+        // 북마크 개수 가져오기
+        const bookmarkData = await bookmarkAPI.getBookmarkCount();
+        setBookmarkCount(bookmarkData.count || 0);
       } else if (currentUser.role === 'ROLE_COMPANY') {
         // 기업 회원: 내 회사 채용공고 가져오기
         const myJobs = await jobAPI.getMyJobPostings();
@@ -383,6 +387,23 @@ const MyPage = () => {
           <ButtonGroup>
             <Button to="/profile/individual">프로필 관리</Button>
             <SecondaryButton to="/resume/upload">이력서 등록</SecondaryButton>
+          </ButtonGroup>
+        </Section>
+
+        <Section>
+          <SectionTitle>나의 활동</SectionTitle>
+          <StatsGrid>
+            <StatCard>
+              <h3>{applications.length}</h3>
+              <p>지원한 공고</p>
+            </StatCard>
+            <StatCard>
+              <h3>{bookmarkCount}</h3>
+              <p>찜한 공고</p>
+            </StatCard>
+          </StatsGrid>
+          <ButtonGroup>
+            <Button to="/bookmarks">찜한 공고 보기</Button>
           </ButtonGroup>
         </Section>
 

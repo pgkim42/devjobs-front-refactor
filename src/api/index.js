@@ -5,3 +5,5 @@ export { applicationAPI } from './application';
 export { profileAPI } from './profile';
 export { categoryAPI } from './category';
 export { default as homeAPI } from './home';
+export { bookmarkAPI } from './bookmark';
+export { messageAPI } from './message';
