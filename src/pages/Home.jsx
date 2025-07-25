@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { homeAPI } from '../api';
+import { getUser } from '../utils/auth';
 
 const fadeIn = keyframes`
   from {
@@ -391,6 +392,7 @@ const CTAButton = styled(Link)`
 
 const Home = () => {
   const navigate = useNavigate();
+  const user = getUser(); // 현재 로그인한 사용자 정보
   const [recentJobs, setRecentJobs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [stats, setStats] = useState({
@@ -464,9 +466,16 @@ const Home = () => {
           <Button className="primary" onClick={() => navigate('/jobs')}>
             채용공고 둘러보기
           </Button>
-          <Button className="secondary" onClick={() => navigate('/signup')}>
-            지금 시작하기
-          </Button>
+          {!user && (
+            <Button className="secondary" onClick={() => navigate('/signup')}>
+              지금 시작하기
+            </Button>
+          )}
+          {user && (
+            <Button className="secondary" onClick={() => navigate('/mypage')}>
+              마이페이지
+            </Button>
+          )}
         </ButtonGroup>
         <Stats>
           <StatItem>
@@ -540,8 +549,14 @@ const Home = () => {
 
       <CTASection>
         <CTATitle>준비되셨나요?</CTATitle>
-        <CTAText>지금 바로 시작하고 꿈의 직장을 찾아보세요</CTAText>
-        <CTAButton to="/signup">무료로 시작하기</CTAButton>
+        <CTAText>
+          {user ? '다양한 채용 기회를 확인해보세요' : '지금 바로 시작하고 꿈의 직장을 찾아보세요'}
+        </CTAText>
+        {user ? (
+          <CTAButton to="/jobs">채용공고 보러가기</CTAButton>
+        ) : (
+          <CTAButton to="/signup">무료로 시작하기</CTAButton>
+        )}
       </CTASection>
     </Container>
   );

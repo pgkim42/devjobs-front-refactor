@@ -283,6 +283,7 @@ const Header = () => {
                 {unreadCount > 0 && <Badge>{unreadCount}</Badge>}
               </NavLink>
             )}
+            <NavLink to="/faq">FAQ</NavLink>
           </Nav>
           
           <UserSection>
@@ -335,6 +336,7 @@ const Header = () => {
             쪽지함 {unreadCount > 0 && `(${unreadCount})`}
           </MobileNavLink>
         )}
+        <MobileNavLink to="/faq">FAQ</MobileNavLink>
         
         <MobileUserSection>
           {user ? (

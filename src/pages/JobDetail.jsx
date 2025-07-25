@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { jobAPI, applicationAPI, bookmarkAPI, messageAPI } from '../api';
@@ -58,6 +58,7 @@ const JobTitle = styled.h1`
   color: #333;
   margin-bottom: 15px;
   font-size: 28px;
+  padding-right: 60px;
 `;
 
 const CompanyName = styled.h2`
@@ -291,17 +292,22 @@ const JobDetail = () => {
   const [messageContent, setMessageContent] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
   const user = getUser();
+  const hasFetched = useRef(false); // 중복 호출 방지
 
   useEffect(() => {
-    fetchJobDetail();
-    if (user && user.role === 'ROLE_INDIVIDUAL') {
-      checkBookmarkStatus();
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      fetchJobDetail();
+      if (user && user.role === 'ROLE_INDIVIDUAL') {
+        checkBookmarkStatus();
+      }
     }
   }, [id]);
 
   const fetchJobDetail = async () => {
     try {
       const data = await jobAPI.getJobDetail(id);
+      console.log('Job Detail Data:', data);  // 데이터 구조 확인
       setJob(data);
     } catch (error) {
       console.error('채용공고 로드 실패:', error);
@@ -414,10 +420,19 @@ const JobDetail = () => {
       return;
     }
 
+    // companyId 확인
+    const companyId = job.companyInfo?.companyId || job.companyInfo?.id || job.companyId;
+    
+    if (!companyId) {
+      console.error('Company ID not found in job data:', job);
+      alert('기업 정보를 찾을 수 없습니다.');
+      return;
+    }
+
     setSendingMessage(true);
     try {
       await messageAPI.sendMessage({
-        receiverId: job.companyInfo.companyId,
+        receiverId: companyId,
         content: messageContent,
         jobPostingId: parseInt(id)
       });
@@ -426,7 +441,12 @@ const JobDetail = () => {
       setMessageContent('');
     } catch (error) {
       console.error('메시지 전송 실패:', error);
-      alert('문의 전송에 실패했습니다.');
+      console.error('요청 데이터:', {
+        receiverId: companyId,
+        content: messageContent,
+        jobPostingId: parseInt(id)
+      });
+      alert(error.response?.data?.message || '문의 전송에 실패했습니다.');
     } finally {
       setSendingMessage(false);
     }
@@ -457,22 +477,25 @@ const JobDetail = () => {
       <BackButton to="/jobs">← 목록으로 돌아가기</BackButton>
       
       <JobHeader>
-        {user && user.role === 'ROLE_INDIVIDUAL' && (
-          <BookmarkButton
-            isBookmarked={isBookmarked}
-            onClick={handleBookmarkToggle}
-          >
-            {isBookmarked ? '❤️' : '🤍'}
-          </BookmarkButton>
-        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
           <div>
             <JobTitle>{job.title}</JobTitle>
             <CompanyName>{job.companyInfo?.companyName}</CompanyName>
           </div>
-          <StatusBadge closed={isJobClosed()}>
-            {isJobClosed() ? '마감' : '지원가능'}
-          </StatusBadge>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <StatusBadge closed={isJobClosed()}>
+              {isJobClosed() ? '마감' : '지원가능'}
+            </StatusBadge>
+            {user && user.role === 'ROLE_INDIVIDUAL' && (
+              <BookmarkButton
+                isBookmarked={isBookmarked}
+                onClick={handleBookmarkToggle}
+                style={{ position: 'static', fontSize: '24px' }}
+              >
+                {isBookmarked ? '❤️' : '🤍'}
+              </BookmarkButton>
+            )}
+          </div>
         </div>
         
         <InfoGrid>
@@ -492,38 +515,42 @@ const JobDetail = () => {
             <h4>마감일</h4>
             <p>{formatDate(job.deadline)}</p>
           </InfoItem>
+          <InfoItem>
+            <h4>조회수</h4>
+            <p>{job.viewCount || 0}회</p>
+          </InfoItem>
         </InfoGrid>
       </JobHeader>
 
       <ContentSection>
         <h3>상세 내용</h3>
         <p>{job.content}</p>
+        
+        <ButtonContainer>
+          {isOwner ? (
+            <>
+              <EditButton onClick={handleEdit}>수정하기</EditButton>
+              <DeleteButton onClick={handleDelete}>삭제하기</DeleteButton>
+            </>
+          ) : (
+            <>
+              {user?.role === 'ROLE_INDIVIDUAL' && (
+                <>
+                  <ApplyButton 
+                    onClick={handleApply} 
+                    disabled={applying || isJobClosed()}
+                  >
+                    {applying ? '지원 중...' : isJobClosed() ? '마감됨' : '지원하기'}
+                  </ApplyButton>
+                  <InquiryButton onClick={handleInquiry}>
+                    문의하기
+                  </InquiryButton>
+                </>
+              )}
+            </>
+          )}
+        </ButtonContainer>
       </ContentSection>
-
-      <ButtonContainer>
-        {isOwner ? (
-          <>
-            <EditButton onClick={handleEdit}>수정하기</EditButton>
-            <DeleteButton onClick={handleDelete}>삭제하기</DeleteButton>
-          </>
-        ) : (
-          <>
-            {user?.role === 'ROLE_INDIVIDUAL' && (
-              <>
-                <ApplyButton 
-                  onClick={handleApply} 
-                  disabled={applying || isJobClosed()}
-                >
-                  {applying ? '지원 중...' : isJobClosed() ? '마감됨' : '지원하기'}
-                </ApplyButton>
-                <InquiryButton onClick={handleInquiry}>
-                  문의하기
-                </InquiryButton>
-              </>
-            )}
-          </>
-        )}
-      </ButtonContainer>
       
       {showInquiryModal && (
         <ModalOverlay onClick={() => setShowInquiryModal(false)}>

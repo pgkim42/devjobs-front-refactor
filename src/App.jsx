@@ -1,27 +1,28 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { createGlobalStyle } from 'styled-components';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { createGlobalStyle } from "styled-components";
 
 // 레이아웃
-import Layout from './components/Layout';
+import Layout from "./components/Layout";
 
 // 페이지
-import Home from './pages/Home';
-import Login from './pages/Login';
-import SignupSelect from './pages/SignupSelect';
-import SignupIndividual from './pages/SignupIndividual';
-import SignupCompany from './pages/SignupCompany';
-import JobList from './pages/JobList';
-import JobDetail from './pages/JobDetail';
-import JobCreate from './pages/JobCreate';
-import JobEdit from './pages/JobEdit';
-import JobApplications from './pages/JobApplications';
-import MyPage from './pages/MyPage';
-import ProfileIndividual from './pages/ProfileIndividual';
-import ProfileCompany from './pages/ProfileCompany';
-import ResumeUpload from './pages/ResumeUpload';
-import BookmarkedJobs from './pages/BookmarkedJobs';
-import Messages from './pages/Messages';
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import SignupSelect from "./pages/SignupSelect";
+import SignupIndividual from "./pages/SignupIndividual";
+import SignupCompany from "./pages/SignupCompany";
+import JobList from "./pages/JobList";
+import JobDetail from "./pages/JobDetail";
+import JobCreate from "./pages/JobCreate";
+import JobEdit from "./pages/JobEdit";
+import JobApplications from "./pages/JobApplications";
+import MyPage from "./pages/MyPage";
+import ProfileIndividual from "./pages/ProfileIndividual";
+import ProfileCompany from "./pages/ProfileCompany";
+import ResumeUpload from "./pages/ResumeUpload";
+import BookmarkedJobs from "./pages/BookmarkedJobs";
+import Messages from "./pages/Messages";
+import FAQ from "./pages/Faq";
 
 // 전역 스타일
 const GlobalStyle = createGlobalStyle`
@@ -74,6 +75,7 @@ function App() {
           <Route path="resume/upload" element={<ResumeUpload />} />
           <Route path="bookmarks" element={<BookmarkedJobs />} />
           <Route path="messages" element={<Messages />} />
+          <Route path="faq" element={<FAQ />} />
         </Route>
       </Routes>
     </BrowserRouter>

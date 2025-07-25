@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { jobAPI, bookmarkAPI } from '../api';
+import { jobAPI, bookmarkAPI, categoryAPI } from '../api';
 import { getUser } from '../utils/auth';
 
 const Container = styled.div`
@@ -141,6 +141,20 @@ const SearchButton = styled.button`
   }
 `;
 
+const SortSelect = styled.select`
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: #0066ff;
+  }
+`;
+
 const JobGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -266,26 +280,217 @@ const Pagination = styled.div`
 `;
 
 const PageButton = styled.button`
-  padding: 8px 12px;
-  border: 1px solid #ddd;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid ${props => props.active ? '#0066ff' : '#ddd'};
   background: ${props => props.active ? '#0066ff' : 'white'};
   color: ${props => props.active ? 'white' : '#333'};
   border-radius: 4px;
   cursor: pointer;
+  font-weight: ${props => props.active ? '600' : '400'};
+  font-size: 14px;
+  transition: all 0.2s;
   
   &:hover:not(:disabled) {
     background: ${props => props.active ? '#0052cc' : '#f0f0f0'};
+    border-color: #0066ff;
   }
   
   &:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+    background: #f5f5f5;
+  }
+  
+  &.nav-button {
+    padding: 0 12px;
+    min-width: auto;
   }
   
   @media (max-width: 768px) {
-    padding: 6px 10px;
-    font-size: 14px;
+    min-width: 32px;
+    height: 32px;
+    font-size: 13px;
+    padding: 0 6px;
   }
+`;
+
+const PageInfo = styled.div`
+  color: #666;
+  font-size: 14px;
+  margin: 0 16px;
+  white-space: nowrap;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    text-align: center;
+    margin: 10px 0;
+    order: -1;
+  }
+`;
+
+const PageEllipsis = styled.span`
+  color: #999;
+  padding: 0 8px;
+  user-select: none;
+`;
+
+const FilterToggleButton = styled.button`
+  padding: 10px 20px;
+  background: ${props => props.active ? '#0066ff' : '#f0f0f0'};
+  color: ${props => props.active ? 'white' : '#333'};
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: ${props => props.active ? '#0052cc' : '#e0e0e0'};
+  }
+  
+  .badge {
+    background: ${props => props.active ? 'rgba(255,255,255,0.3)' : '#0066ff'};
+    color: ${props => props.active ? 'white' : 'white'};
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+`;
+
+const FilterPanel = styled.div`
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
+`;
+
+const FilterGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+`;
+
+const FilterGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const FilterLabel = styled.label`
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+`;
+
+const FilterSelect = styled.select`
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: #0066ff;
+  }
+`;
+
+const FilterInput = styled.input`
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  
+  &:focus {
+    outline: none;
+    border-color: #0066ff;
+  }
+`;
+
+const RangeInputGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const FilterActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  
+  @media (max-width: 768px) {
+    justify-content: stretch;
+    flex-direction: column;
+  }
+`;
+
+const ResetButton = styled.button`
+  padding: 8px 16px;
+  background: white;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #f0f0f0;
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const SearchResultInfo = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+`;
+
+const ResultCount = styled.div`
+  font-size: 16px;
+  color: #333;
+  
+  strong {
+    color: #0066ff;
+    font-size: 20px;
+    margin: 0 4px;
+  }
+`;
+
+const SearchKeyword = styled.span`
+  color: #666;
+  font-style: italic;
 `;
 
 const JobList = () => {
@@ -294,15 +499,34 @@ const JobList = () => {
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0); // 전체 공고 수
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchDebounceTimer, setSearchDebounceTimer] = useState(null);
   const [bookmarkedIds, setBookmarkedIds] = useState([]);
+  const [sortBy, setSortBy] = useState('createDate,desc'); // 기본값: 최신순
   const user = getUser();
+  
+  // 필터 상태
+  const [filters, setFilters] = useState({
+    location: '',
+    minSalary: '',
+    maxSalary: '',
+    minExperience: '',
+    maxExperience: '',
+    jobCategoryId: ''
+  });
+  const [categories, setCategories] = useState([]); // 카테고리 목록
+  const [isFiltersVisible, setIsFiltersVisible] = useState(false); // 필터 표시 여부
 
   useEffect(() => {
     fetchJobs();
-  }, [currentPage]);
+  }, [currentPage, sortBy, filters]); // filters 추가
+  
+  useEffect(() => {
+    // 카테고리 목록 가져오기
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     // cleanup: 컴포넌트 언마운트 시 타이머 정리
@@ -318,19 +542,33 @@ const JobList = () => {
     if (user && user.role === 'ROLE_INDIVIDUAL') {
       fetchBookmarkedIds();
     }
-  }, [user]);
+  }, [user?.id]); // user 객체 대신 user.id만 의존성으로 사용
 
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const response = await jobAPI.getJobListWithPageInfo({
+      
+      // 필터 파라미터 준비
+      const params = {
         page: currentPage,
         size: 12,
-        keyword: keyword || undefined
-      });
+        keyword: keyword || undefined,
+        sort: sortBy
+      };
+      
+      // 필터 값들 추가 (빈 문자열은 제외)
+      if (filters.location) params.location = filters.location;
+      if (filters.minSalary) params.minSalary = parseInt(filters.minSalary);
+      if (filters.maxSalary) params.maxSalary = parseInt(filters.maxSalary);
+      if (filters.minExperience) params.minExperience = parseInt(filters.minExperience);
+      if (filters.maxExperience) params.maxExperience = parseInt(filters.maxExperience);
+      if (filters.jobCategoryId) params.jobCategoryId = parseInt(filters.jobCategoryId);
+      
+      const response = await jobAPI.getJobListWithPageInfo(params);
       
       setJobs(response.content || []);
       setTotalPages(response.totalPages || 0);
+      setTotalElements(response.totalElements || 0);
     } catch (error) {
       console.error('채용공고 로드 실패:', error);
       setJobs([]);
@@ -338,11 +576,100 @@ const JobList = () => {
       setLoading(false);
     }
   };
+  
+  const fetchCategories = async () => {
+    try {
+      const data = await categoryAPI.getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error('카테고리 로드 실패:', error);
+    }
+  };
 
   const handleSearch = () => {
     setCurrentPage(0);
     setShowSuggestions(false);
     fetchJobs();
+  };
+
+  const handleSortChange = (newSort) => {
+    setSortBy(newSort);
+    setCurrentPage(0); // 정렬 변경 시 첫 페이지로 이동
+  };
+  
+  const handleFilterChange = (filterName, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }));
+    setCurrentPage(0); // 필터 변경 시 첫 페이지로 이동
+  };
+  
+  const resetFilters = () => {
+    setFilters({
+      location: '',
+      minSalary: '',
+      maxSalary: '',
+      minExperience: '',
+      maxExperience: '',
+      jobCategoryId: ''
+    });
+    setCurrentPage(0);
+  };
+  
+  const hasActiveFilters = () => {
+    return Object.values(filters).some(value => value !== '');
+  };
+  
+  // 지역 목록 (실제로는 API에서 가져올 수도 있음)
+  const locations = [
+    '전체',
+    '서울', '경기', '인천', '부산', '대구', '대전', 
+    '광주', '울산', '세종', '강원', '충북', '충남', 
+    '전북', '전남', '경북', '경남', '제주'
+  ];
+
+  // 페이지 번호 생성 로직
+  const generatePageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 10; // 한 번에 보여줄 최대 페이지 수
+    const halfRange = Math.floor(maxPagesToShow / 2);
+    
+    let startPage = Math.max(0, currentPage - halfRange);
+    let endPage = Math.min(totalPages - 1, currentPage + halfRange);
+    
+    // 시작 부분에서 페이지가 부족한 경우 끝쪽에 더 표시
+    if (currentPage < halfRange) {
+      endPage = Math.min(totalPages - 1, maxPagesToShow - 1);
+    }
+    
+    // 끝 부분에서 페이지가 부족한 경우 시작쪽에 더 표시
+    if (currentPage > totalPages - halfRange - 1) {
+      startPage = Math.max(0, totalPages - maxPagesToShow);
+    }
+    
+    // 첫 페이지
+    if (startPage > 0) {
+      pages.push(0);
+      if (startPage > 1) {
+        pages.push('...');
+      }
+    }
+    
+    // 중간 페이지들
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    // 마지막 페이지
+    if (endPage < totalPages - 1) {
+      if (endPage < totalPages - 2) {
+        pages.push('...');
+      }
+      pages.push(totalPages - 1);
+    }
+    
+    return pages;
   };
 
   const fetchSuggestions = async (searchKeyword) => {
@@ -516,7 +843,124 @@ const JobList = () => {
           )}
         </SearchWrapper>
         <SearchButton onClick={handleSearch}>검색</SearchButton>
+        <SortSelect value={sortBy} onChange={(e) => handleSortChange(e.target.value)}>
+          <option value="createDate,desc">최신순</option>
+          <option value="viewCount,desc">조회수순</option>
+          <option value="deadline,asc">마감일순</option>
+          <option value="salary,desc">연봉 높은순</option>
+          <option value="salary,asc">연봉 낮은순</option>
+        </SortSelect>
+        <FilterToggleButton 
+          active={isFiltersVisible}
+          onClick={() => setIsFiltersVisible(!isFiltersVisible)}
+        >
+          상세 필터
+          {hasActiveFilters() && <span className="badge">{Object.values(filters).filter(v => v !== '').length}</span>}
+        </FilterToggleButton>
       </FilterSection>
+      
+      {isFiltersVisible && (
+        <FilterPanel>
+          <FilterGrid>
+            {/* 지역 필터 */}
+            <FilterGroup>
+              <FilterLabel>근무지역</FilterLabel>
+              <FilterSelect
+                value={filters.location}
+                onChange={(e) => handleFilterChange('location', e.target.value)}
+              >
+                <option value="">전체</option>
+                {locations.slice(1).map(loc => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
+              </FilterSelect>
+            </FilterGroup>
+            
+            {/* 경력 필터 */}
+            <FilterGroup>
+              <FilterLabel>경력</FilterLabel>
+              <RangeInputGroup>
+                <FilterSelect
+                  value={filters.minExperience}
+                  onChange={(e) => handleFilterChange('minExperience', e.target.value)}
+                >
+                  <option value="">최소</option>
+                  {[0, 1, 2, 3, 5, 7, 10].map(year => (
+                    <option key={year} value={year}>{year}년</option>
+                  ))}
+                </FilterSelect>
+                <span>~</span>
+                <FilterSelect
+                  value={filters.maxExperience}
+                  onChange={(e) => handleFilterChange('maxExperience', e.target.value)}
+                >
+                  <option value="">최대</option>
+                  {[1, 2, 3, 5, 7, 10, 15].map(year => (
+                    <option key={year} value={year}>{year}년</option>
+                  ))}
+                </FilterSelect>
+              </RangeInputGroup>
+            </FilterGroup>
+            
+            {/* 연봉 필터 */}
+            <FilterGroup>
+              <FilterLabel>연봉 (만원)</FilterLabel>
+              <RangeInputGroup>
+                <FilterInput
+                  type="number"
+                  placeholder="최소"
+                  value={filters.minSalary}
+                  onChange={(e) => handleFilterChange('minSalary', e.target.value)}
+                />
+                <span>~</span>
+                <FilterInput
+                  type="number"
+                  placeholder="최대"
+                  value={filters.maxSalary}
+                  onChange={(e) => handleFilterChange('maxSalary', e.target.value)}
+                />
+              </RangeInputGroup>
+            </FilterGroup>
+            
+            {/* 직무 카테고리 필터 */}
+            <FilterGroup>
+              <FilterLabel>직무 카테고리</FilterLabel>
+              <FilterSelect
+                value={filters.jobCategoryId}
+                onChange={(e) => handleFilterChange('jobCategoryId', e.target.value)}
+              >
+                <option value="">전체</option>
+                {categories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.categoryName}
+                  </option>
+                ))}
+              </FilterSelect>
+            </FilterGroup>
+          </FilterGrid>
+          
+          <FilterActions>
+            <ResetButton onClick={resetFilters}>
+              필터 초기화
+            </ResetButton>
+          </FilterActions>
+        </FilterPanel>
+      )}
+      
+      {/* 검색 결과 정보 */}
+      {!loading && (
+        <SearchResultInfo>
+          <ResultCount>
+            전체 <strong>{totalElements}</strong>개의 채용공고
+            {(keyword || hasActiveFilters()) && (
+              <SearchKeyword>
+                {keyword && ` "${keyword}" 검색 결과`}
+                {hasActiveFilters() && ' (필터 적용됨)'}
+              </SearchKeyword>
+            )}
+          </ResultCount>
+        </SearchResultInfo>
+      )}
       
       {jobs.length === 0 ? (
         <EmptyMessage>
@@ -543,6 +987,7 @@ const JobList = () => {
                     <InfoItem>{job.workLocation}</InfoItem>
                     <InfoItem>{formatSalary(job.salary)}</InfoItem>
                     <InfoItem>경력 {job.requiredExperienceYears}년↑</InfoItem>
+                    <InfoItem>조회수 {job.viewCount || 0}</InfoItem>
                   </JobInfo>
                   <Deadline>마감일: {formatDate(job.deadline)}</Deadline>
                 </JobLink>
@@ -552,29 +997,66 @@ const JobList = () => {
           
           {totalPages > 1 && (
             <Pagination>
+              {/* 첫 페이지 버튼 */}
               <PageButton 
+                className="nav-button"
+                onClick={() => setCurrentPage(0)}
+                disabled={currentPage === 0}
+                title="첫 페이지"
+              >
+                &laquo;
+              </PageButton>
+              
+              {/* 이전 페이지 버튼 */}
+              <PageButton 
+                className="nav-button"
                 onClick={() => setCurrentPage(prev => prev - 1)}
                 disabled={currentPage === 0}
+                title="이전 페이지"
               >
-                이전
+                &lsaquo;
               </PageButton>
               
-              {[...Array(totalPages)].map((_, index) => (
-                <PageButton
-                  key={index}
-                  active={index === currentPage}
-                  onClick={() => setCurrentPage(index)}
-                >
-                  {index + 1}
-                </PageButton>
-              )).slice(Math.max(0, currentPage - 2), Math.min(totalPages, currentPage + 3))}
+              {/* 페이지 번호들 */}
+              {generatePageNumbers().map((page, index) => (
+                page === '...' ? (
+                  <PageEllipsis key={`ellipsis-${index}`}>...</PageEllipsis>
+                ) : (
+                  <PageButton
+                    key={page}
+                    active={page === currentPage}
+                    onClick={() => setCurrentPage(page)}
+                    title={`${page + 1} 페이지`}
+                  >
+                    {page + 1}
+                  </PageButton>
+                )
+              ))}
               
+              {/* 다음 페이지 버튼 */}
               <PageButton 
+                className="nav-button"
                 onClick={() => setCurrentPage(prev => prev + 1)}
                 disabled={currentPage === totalPages - 1}
+                title="다음 페이지"
               >
-                다음
+                &rsaquo;
               </PageButton>
+              
+              {/* 마지막 페이지 버튼 */}
+              <PageButton 
+                className="nav-button"
+                onClick={() => setCurrentPage(totalPages - 1)}
+                disabled={currentPage === totalPages - 1}
+                title="마지막 페이지"
+              >
+                &raquo;
+              </PageButton>
+              
+              {/* 페이지 정보 */}
+              <PageInfo>
+                {currentPage + 1} / {totalPages} 페이지
+              </PageInfo>
             </Pagination>
           )}
         </>

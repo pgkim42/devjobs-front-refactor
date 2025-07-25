@@ -220,6 +220,76 @@ const MessageMeta = styled.div`
   margin-bottom: 20px;
 `;
 
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &.primary {
+    background: #0066ff;
+    color: white;
+    border: none;
+    
+    &:hover:not(:disabled) {
+      background: #0052cc;
+    }
+  }
+  
+  &.secondary {
+    background: #f0f0f0;
+    color: #333;
+    border: none;
+    
+    &:hover {
+      background: #e0e0e0;
+    }
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const ReplyTextarea = styled.textarea`
+  width: 100%;
+  min-height: 150px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  
+  &:focus {
+    outline: none;
+    border-color: #0066ff;
+  }
+`;
+
+const ReplyInfo = styled.div`
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #666;
+  
+  strong {
+    color: #333;
+  }
+`;
+
 const Messages = () => {
   const [activeTab, setActiveTab] = useState('received');
   const [messages, setMessages] = useState([]);
@@ -228,6 +298,9 @@ const Messages = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showReplyModal, setShowReplyModal] = useState(false);
+  const [replyContent, setReplyContent] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
   const user = getUser();
 
   useEffect(() => {
@@ -293,6 +366,50 @@ const Messages = () => {
     if (diff < 604800000) return `${Math.floor(diff / 86400000)}일 전`;
     
     return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+  };
+
+  const handleReply = () => {
+    if (!selectedMessage) return;
+    
+    // 답장 모달 열기
+    setShowReplyModal(true);
+    setReplyContent('');
+  };
+
+  const handleSendReply = async () => {
+    if (!replyContent.trim() || !selectedMessage) {
+      alert('답장 내용을 입력해주세요.');
+      return;
+    }
+
+    setSendingReply(true);
+    try {
+      // 답장 시 수신자는 원본 메시지의 발신자
+      const receiverId = activeTab === 'received' 
+        ? selectedMessage.senderId 
+        : selectedMessage.receiverId;
+      
+      await messageAPI.sendMessage({
+        receiverId: receiverId,
+        content: replyContent,
+        jobPostingId: selectedMessage.jobPostingId || null
+      });
+      
+      alert('답장을 전송했습니다.');
+      setShowReplyModal(false);
+      setReplyContent('');
+      setSelectedMessage(null);
+      
+      // 보낸 쪽지함으로 이동
+      setActiveTab('sent');
+      setCurrentPage(0);
+      fetchMessages();
+    } catch (error) {
+      console.error('답장 전송 실패:', error);
+      alert('답장 전송에 실패했습니다.');
+    } finally {
+      setSendingReply(false);
+    }
   };
 
   if (!user) {
@@ -413,6 +530,59 @@ const Messages = () => {
             </MessageMeta>
             
             <MessageContent>{selectedMessage.content}</MessageContent>
+            
+            <ModalButtons>
+              {activeTab === 'received' && (
+                <ModalButton className="primary" onClick={handleReply}>
+                  답장하기
+                </ModalButton>
+              )}
+              <ModalButton className="secondary" onClick={() => setSelectedMessage(null)}>
+                닫기
+              </ModalButton>
+            </ModalButtons>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+      
+      {showReplyModal && selectedMessage && (
+        <ModalOverlay onClick={() => setShowReplyModal(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <h2>답장 보내기</h2>
+              <CloseButton onClick={() => setShowReplyModal(false)}>×</CloseButton>
+            </ModalHeader>
+            
+            <ReplyInfo>
+              <div><strong>받는 사람:</strong> {selectedMessage.senderName} ({selectedMessage.senderLoginId})</div>
+              {selectedMessage.jobPostingTitle && (
+                <div><strong>관련 공고:</strong> {selectedMessage.jobPostingTitle}</div>
+              )}
+            </ReplyInfo>
+            
+            <ReplyTextarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="답장 내용을 입력해주세요."
+              maxLength={1000}
+              autoFocus
+            />
+            
+            <ModalButtons>
+              <ModalButton 
+                className="secondary" 
+                onClick={() => setShowReplyModal(false)}
+              >
+                취소
+              </ModalButton>
+              <ModalButton 
+                className="primary" 
+                onClick={handleSendReply}
+                disabled={sendingReply || !replyContent.trim()}
+              >
+                {sendingReply ? '전송 중...' : '보내기'}
+              </ModalButton>
+            </ModalButtons>
           </ModalContent>
         </ModalOverlay>
       )}
