@@ -7,3 +7,4 @@ export { categoryAPI } from './category';
 export { default as homeAPI } from './home';
 export { bookmarkAPI } from './bookmark';
 export { messageAPI } from './message';
+export { default as adminAPI } from './adminService';

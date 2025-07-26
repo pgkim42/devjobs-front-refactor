@@ -277,6 +277,9 @@ const Header = () => {
                 <NavLink to="/jobs/create">공고등록</NavLink>
               </>
             )}
+            {user?.role?.includes('ADMIN') && (
+              <NavLink to="/admin">관리자</NavLink>
+            )}
             {user && (
               <NavLink to="/messages">
                 쪽지함
@@ -330,6 +333,9 @@ const Header = () => {
             <MobileNavLink to="/mypage">마이페이지</MobileNavLink>
             <MobileNavLink to="/jobs/create">공고등록</MobileNavLink>
           </>
+        )}
+        {user?.role?.includes('ADMIN') && (
+          <MobileNavLink to="/admin">관리자</MobileNavLink>
         )}
         {user && (
           <MobileNavLink to="/messages">

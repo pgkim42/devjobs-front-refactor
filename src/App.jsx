@@ -24,6 +24,16 @@ import BookmarkedJobs from "./pages/BookmarkedJobs";
 import Messages from "./pages/Messages";
 import FAQ from "./pages/Faq";
 
+// 관리자 페이지
+import AdminDashboard from "./components/admin/AdminDashboard";
+import IndividualUserList from "./components/admin/IndividualUserList";
+import IndividualUserDetail from "./components/admin/IndividualUserDetail";
+import CompanyUserList from "./components/admin/CompanyUserList";
+import CompanyUserDetail from "./components/admin/CompanyUserDetail";
+import JobPostingManagement from "./components/admin/JobPostingManagement";
+import CategoryManagement from "./components/admin/CategoryManagement";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+
 // 전역 스타일
 const GlobalStyle = createGlobalStyle`
   * {
@@ -76,6 +86,13 @@ function App() {
           <Route path="bookmarks" element={<BookmarkedJobs />} />
           <Route path="messages" element={<Messages />} />
           <Route path="faq" element={<FAQ />} />
+          <Route path="admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+          <Route path="admin/users/individual" element={<ProtectedAdminRoute><IndividualUserList /></ProtectedAdminRoute>} />
+          <Route path="admin/users/individual/:userId" element={<ProtectedAdminRoute><IndividualUserDetail /></ProtectedAdminRoute>} />
+          <Route path="admin/users/company" element={<ProtectedAdminRoute><CompanyUserList /></ProtectedAdminRoute>} />
+          <Route path="admin/users/company/:userId" element={<ProtectedAdminRoute><CompanyUserDetail /></ProtectedAdminRoute>} />
+          <Route path="admin/job-postings" element={<ProtectedAdminRoute><JobPostingManagement /></ProtectedAdminRoute>} />
+          <Route path="admin/categories" element={<ProtectedAdminRoute><CategoryManagement /></ProtectedAdminRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>
