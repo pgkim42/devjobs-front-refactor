@@ -212,6 +212,29 @@ const BookmarkButton = styled.button`
   }
 `;
 
+const ShareButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 55px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  transition: all 0.2s;
+  
+  &:hover {
+    color: #666;
+    transform: scale(1.1);
+  }
+  
+  @media (max-width: 768px) {
+    top: 16px;
+    right: 45px;
+    font-size: 20px;
+  }
+`;
+
 const JobTitle = styled.h3`
   color: #333;
   margin-bottom: 10px;
@@ -375,6 +398,105 @@ const FilterPanel = styled.div`
   }
 `;
 
+const FilterChips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+`;
+
+const FilterChip = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 20px;
+  font-size: 14px;
+  
+  button {
+    background: none;
+    border: none;
+    color: #1976d2;
+    cursor: pointer;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+    
+    &:hover {
+      color: #1565c0;
+    }
+  }
+`;
+
+const SalarySlider = styled.div`
+  margin: 20px 0;
+  
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    
+    span {
+      color: #666;
+      font-size: 14px;
+    }
+  }
+  
+  input[type="range"] {
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+    
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #0066ff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    &::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #0066ff;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+  }
+`;
+
+const LocationChips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+`;
+
+const LocationChip = styled.button`
+  padding: 6px 14px;
+  border: 1px solid ${props => props.selected ? '#0066ff' : '#ddd'};
+  background: ${props => props.selected ? '#0066ff' : 'white'};
+  color: ${props => props.selected ? 'white' : '#666'};
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: #0066ff;
+    background: ${props => props.selected ? '#0052cc' : '#f0f0f0'};
+  }
+`;
+
 const FilterGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -516,6 +638,9 @@ const JobList = () => {
     maxExperience: '',
     jobCategoryId: ''
   });
+  
+  // 연봉 슬라이더용 상태
+  const [salaryRange, setSalaryRange] = useState(3000);
   const [categories, setCategories] = useState([]); // 카테고리 목록
   const [isFiltersVisible, setIsFiltersVisible] = useState(false); // 필터 표시 여부
 
@@ -801,6 +926,38 @@ const JobList = () => {
     }
   };
 
+  const handleShare = (e, jobId, jobTitle) => {
+    e.preventDefault(); // 링크 클릭 방지
+    e.stopPropagation(); // 이벤트 버블링 방지
+    
+    const url = `${window.location.origin}/jobs/${jobId}`;
+    
+    // 클립보드에 복사
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        alert(`"${jobTitle}" 채용공고 링크가 복사되었습니다!`);
+      }).catch(() => {
+        // fallback
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert(`"${jobTitle}" 채용공고 링크가 복사되었습니다!`);
+      });
+    } else {
+      // IE 등 구형 브라우저 대응
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert(`"${jobTitle}" 채용공고 링크가 복사되었습니다!`);
+    }
+  };
+
   if (loading && jobs.length === 0) {
     return (
       <Container>
@@ -861,19 +1018,63 @@ const JobList = () => {
       
       {isFiltersVisible && (
         <FilterPanel>
+          {/* 활성화된 필터 칩 표시 */}
+          {hasActiveFilters() && (
+            <FilterChips>
+              {filters.location && (
+                <FilterChip>
+                  📍 {filters.location}
+                  <button onClick={() => handleFilterChange('location', '')}>×</button>
+                </FilterChip>
+              )}
+              {(filters.minSalary || filters.maxSalary) && (
+                <FilterChip>
+                  💰 {filters.minSalary || '0'}만원 ~ {filters.maxSalary || '무관'}만원
+                  <button onClick={() => {
+                    handleFilterChange('minSalary', '');
+                    handleFilterChange('maxSalary', '');
+                  }}>×</button>
+                </FilterChip>
+              )}
+              {(filters.minExperience || filters.maxExperience) && (
+                <FilterChip>
+                  🎯 경력 {filters.minExperience || '0'}년 ~ {filters.maxExperience || '무관'}년
+                  <button onClick={() => {
+                    handleFilterChange('minExperience', '');
+                    handleFilterChange('maxExperience', '');
+                  }}>×</button>
+                </FilterChip>
+              )}
+              {filters.jobCategoryId && categories.find(c => c.id == filters.jobCategoryId) && (
+                <FilterChip>
+                  💼 {categories.find(c => c.id == filters.jobCategoryId).name}
+                  <button onClick={() => handleFilterChange('jobCategoryId', '')}>×</button>
+                </FilterChip>
+              )}
+            </FilterChips>
+          )}
+          
           <FilterGrid>
-            {/* 지역 필터 */}
-            <FilterGroup>
+            {/* 지역 필터 - 칩 스타일 */}
+            <FilterGroup style={{ gridColumn: 'span 2' }}>
               <FilterLabel>근무지역</FilterLabel>
-              <FilterSelect
-                value={filters.location}
-                onChange={(e) => handleFilterChange('location', e.target.value)}
-              >
-                <option value="">전체</option>
+              <LocationChips>
+                <LocationChip 
+                  selected={!filters.location}
+                  onClick={() => handleFilterChange('location', '')}
+                >
+                  전체
+                </LocationChip>
                 {locations.slice(1).map(loc => (
-                  <option key={loc} value={loc}>{loc}</option>
+                  <LocationChip 
+                    key={loc}
+                    selected={filters.location === loc}
+                    onClick={() => handleFilterChange('location', loc)}
+                  >
+                    {loc}
+                  </LocationChip>
                 ))}
-              </FilterSelect>
+              </LocationChips>
             </FilterGroup>
             
             {/* 경력 필터 */}
@@ -902,24 +1103,46 @@ const JobList = () => {
               </RangeInputGroup>
             </FilterGroup>
             
-            {/* 연봉 필터 */}
-            <FilterGroup>
-              <FilterLabel>연봉 (만원)</FilterLabel>
-              <RangeInputGroup>
-                <FilterInput
-                  type="number"
-                  placeholder="최소"
-                  value={filters.minSalary}
-                  onChange={(e) => handleFilterChange('minSalary', e.target.value)}
+            {/* 연봉 필터 - 슬라이더 */}
+            <FilterGroup style={{ gridColumn: 'span 2' }}>
+              <FilterLabel>연봉 범위</FilterLabel>
+              <SalarySlider>
+                <div className="slider-header">
+                  <span>최소: {filters.minSalary || '0'}만원</span>
+                  <span>최대: {filters.maxSalary || salaryRange}만원</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="15000"
+                  step="500"
+                  value={filters.maxSalary || salaryRange}
+                  onChange={(e) => {
+                    setSalaryRange(e.target.value);
+                    handleFilterChange('maxSalary', e.target.value);
+                  }}
                 />
-                <span>~</span>
-                <FilterInput
-                  type="number"
-                  placeholder="최대"
-                  value={filters.maxSalary}
-                  onChange={(e) => handleFilterChange('maxSalary', e.target.value)}
-                />
-              </RangeInputGroup>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                  <FilterInput
+                    type="number"
+                    placeholder="최소"
+                    value={filters.minSalary}
+                    onChange={(e) => handleFilterChange('minSalary', e.target.value)}
+                    style={{ width: '100px' }}
+                  />
+                  <span style={{ alignSelf: 'center' }}>~</span>
+                  <FilterInput
+                    type="number"
+                    placeholder="최대"
+                    value={filters.maxSalary}
+                    onChange={(e) => {
+                      handleFilterChange('maxSalary', e.target.value);
+                      setSalaryRange(e.target.value || 3000);
+                    }}
+                    style={{ width: '100px' }}
+                  />
+                </div>
+              </SalarySlider>
             </FilterGroup>
             
             {/* 직무 카테고리 필터 */}
@@ -980,6 +1203,12 @@ const JobList = () => {
                     {bookmarkedIds.includes(job.id) ? '❤️' : '🤍'}
                   </BookmarkButton>
                 )}
+                <ShareButton
+                  onClick={(e) => handleShare(e, job.id, job.title)}
+                  title="링크 복사"
+                >
+                  📋
+                </ShareButton>
                 <JobLink to={`/jobs/${job.id}`}>
                   <JobTitle>{job.title}</JobTitle>
                   <CompanyName>{job.companyName}</CompanyName>

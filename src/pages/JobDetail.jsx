@@ -112,7 +112,7 @@ const ContentSection = styled.div`
 const ButtonContainer = styled.div`
   display: flex;
   gap: 15px;
-  justify-content: center;
+  justify-content: flex-end;
   margin-top: 30px;
 `;
 
@@ -154,6 +154,15 @@ const InquiryButton = styled(Button)`
   
   &:hover:not(:disabled) {
     background: #5a6268;
+  }
+`;
+
+const ShareButton = styled(Button)`
+  background: #4CAF50;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background: #45a049;
   }
 `;
 
@@ -404,6 +413,35 @@ const JobDetail = () => {
     return new Date(job.deadline) < new Date();
   };
 
+  const handleShare = () => {
+    const url = window.location.href;
+    
+    // 클립보드에 복사
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        alert('채용공고 링크가 복사되었습니다!');
+      }).catch(() => {
+        // fallback
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('채용공고 링크가 복사되었습니다!');
+      });
+    } else {
+      // IE 등 구형 브라우저 대응
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('채용공고 링크가 복사되었습니다!');
+    }
+  };
+
   const handleInquiry = () => {
     if (!user) {
       alert('로그인이 필요합니다.');
@@ -547,6 +585,9 @@ const JobDetail = () => {
                   </InquiryButton>
                 </>
               )}
+              <ShareButton onClick={handleShare}>
+                링크 복사
+              </ShareButton>
             </>
           )}
         </ButtonContainer>
