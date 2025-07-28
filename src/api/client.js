@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Axios 인스턴스 생성
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL + "/api" || "http://localhost:8080/api",
+  baseURL: "/api", // 원래대로
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
