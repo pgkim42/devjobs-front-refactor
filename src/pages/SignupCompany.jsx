@@ -94,15 +94,12 @@ const SignupCompany = () => {
     password: '',
     passwordConfirm: '',
     companyName: '',
-    businessNumber: '',
-    representativeName: '',
+    companyCode: '',
+    name: '',
+    ceoName: '',
     email: '',
-    phone: '',
-    address: '',
-    industry: '',
-    employeeCount: '',
-    description: '',
-    website: ''
+    companyAddress: '',
+    companyWebsite: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -127,7 +124,6 @@ const SignupCompany = () => {
 
     try {
       const { passwordConfirm, ...signupData } = formData;
-      signupData.employeeCount = parseInt(signupData.employeeCount) || 0;
       await authAPI.signUpCompany(signupData);
       alert('회원가입이 완료되었습니다. 로그인해주세요.');
       navigate('/login');
@@ -190,9 +186,20 @@ const SignupCompany = () => {
           <Label>사업자등록번호</Label>
           <Input
             type="text"
-            name="businessNumber"
+            name="companyCode"
             placeholder="000-00-00000"
-            value={formData.businessNumber}
+            value={formData.companyCode}
+            onChange={handleChange}
+            required
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <Label>담당자명</Label>
+          <Input
+            type="text"
+            name="name"
+            value={formData.name}
             onChange={handleChange}
             required
           />
@@ -202,8 +209,8 @@ const SignupCompany = () => {
           <Label>대표자명</Label>
           <Input
             type="text"
-            name="representativeName"
-            value={formData.representativeName}
+            name="ceoName"
+            value={formData.ceoName}
             onChange={handleChange}
             required
           />
@@ -220,71 +227,30 @@ const SignupCompany = () => {
           />
         </FormGroup>
 
-        <FormGroup>
-          <Label>전화번호</Label>
-          <Input
-            type="tel"
-            name="phone"
-            placeholder="02-0000-0000"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-          />
-        </FormGroup>
 
         <FormGroup>
-          <Label>주소</Label>
+          <Label>회사 주소</Label>
           <Input
             type="text"
-            name="address"
-            value={formData.address}
+            name="companyAddress"
+            value={formData.companyAddress}
             onChange={handleChange}
             required
           />
         </FormGroup>
 
-        <FormGroup>
-          <Label>업종</Label>
-          <Input
-            type="text"
-            name="industry"
-            value={formData.industry}
-            onChange={handleChange}
-            required
-          />
-        </FormGroup>
-
-        <FormGroup>
-          <Label>직원수</Label>
-          <Input
-            type="number"
-            name="employeeCount"
-            value={formData.employeeCount}
-            onChange={handleChange}
-            required
-          />
-        </FormGroup>
 
         <FormGroup>
           <Label>웹사이트 (선택)</Label>
           <Input
             type="url"
-            name="website"
+            name="companyWebsite"
             placeholder="https://example.com"
-            value={formData.website}
+            value={formData.companyWebsite}
             onChange={handleChange}
           />
         </FormGroup>
 
-        <FormGroup>
-          <Label>기업 소개</Label>
-          <Textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-          />
-        </FormGroup>
 
         <Button type="submit" disabled={loading}>
           {loading ? '가입 중...' : '회원가입'}
