@@ -3,15 +3,20 @@ exports.handler = async (event, context) => {
   const path = event.path.replace('/.netlify/functions/proxy', '');
   
   try {
-    // node-fetch 대신 내장 fetch 사용 (Node.js 18+)
-    const response = await fetch(`http://49.50.130.77:8080/api${path}`, {
+    const options = {
       method: event.httpMethod,
       headers: {
         'Content-Type': 'application/json',
         ...(event.headers.authorization && { Authorization: event.headers.authorization })
-      },
-      body: event.body
-    });
+      }
+    };
+    
+    // GET, HEAD가 아닐 때만 body 추가
+    if (event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD' && event.body) {
+      options.body = event.body;
+    }
+    
+    const response = await fetch(`http://49.50.130.77:8080/api${path}`, options);
     
     const data = await response.json();
     
