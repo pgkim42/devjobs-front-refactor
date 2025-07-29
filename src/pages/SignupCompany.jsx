@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { authAPI } from '../api/auth';
+import SignupSuccessModal from '../components/SignupSuccessModal';
 
 const Container = styled.div`
   max-width: 500px;
@@ -103,6 +104,7 @@ const SignupCompany = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -125,8 +127,7 @@ const SignupCompany = () => {
     try {
       const { passwordConfirm, ...signupData } = formData;
       await authAPI.signUpCompany(signupData);
-      alert('회원가입이 완료되었습니다. 로그인해주세요.');
-      navigate('/login');
+      setShowSuccessModal(true);
     } catch (err) {
       setError(err.response?.data?.message || '회원가입에 실패했습니다.');
     } finally {
@@ -134,8 +135,14 @@ const SignupCompany = () => {
     }
   };
 
+  const handleModalClose = () => {
+    setShowSuccessModal(false);
+    navigate('/login');
+  };
+
   return (
-    <Container>
+    <>
+      <Container>
       <Title>기업 회원가입</Title>
       <Form onSubmit={handleSubmit}>
         <FormGroup>
@@ -258,6 +265,12 @@ const SignupCompany = () => {
       </Form>
       {error && <ErrorMessage>{error}</ErrorMessage>}
     </Container>
+    <SignupSuccessModal 
+      isOpen={showSuccessModal} 
+      onClose={handleModalClose}
+      userType="company"
+    />
+    </>
   );
 };
 
