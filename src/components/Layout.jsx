@@ -1,27 +1,18 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import styled from 'styled-components';
 import Header from './Header';
-
-const LayoutContainer = styled.div`
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-`;
-
-const Main = styled.main`
-  flex: 1;
-  width: 100%;
-`;
+import PageTransition from './PageTransition';
 
 const Layout = () => {
   return (
-    <LayoutContainer>
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <Main>
-        <Outlet />
-      </Main>
-    </LayoutContainer>
+      <main className="flex-1 w-full">
+        <PageTransition>
+          <Outlet />
+        </PageTransition>
+      </main>
+    </div>
   );
 };
 

@@ -1,6 +1,5 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { createGlobalStyle } from "styled-components";
 
 // 레이아웃
 import Layout from "./components/Layout";
@@ -34,39 +33,10 @@ import JobPostingManagement from "./components/admin/JobPostingManagement";
 import CategoryManagement from "./components/admin/CategoryManagement";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 
-// 전역 스타일
-const GlobalStyle = createGlobalStyle`
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background-color: #f5f7fa;
-  }
-
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
-
-  button {
-    cursor: pointer;
-    border: none;
-    outline: none;
-  }
-`;
 
 function App() {
   return (
     <BrowserRouter>
-      <GlobalStyle />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
